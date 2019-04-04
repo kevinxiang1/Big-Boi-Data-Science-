@@ -26,7 +26,8 @@ def main():
         data[i][7] = []
         for track in tracks:
             data[i][7].append(track.values())
-
+    print(data)
+    return(data)
     # for i in range(len(data[0])):
     #     if i !=7: 
     #         print(data[1][i])
