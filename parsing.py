@@ -31,7 +31,7 @@ def main():
     songs = dict()
 
     
-    for i in range(len(raw)):
+    for i in range(len(raw)): 
 
         cur_playlist = raw[i]
         data.append(cur_playlist.values())
@@ -47,20 +47,20 @@ def main():
             track_uri = str(data[i][7][j][2])
 
             if track_name not in songs:
-                audio_features = [sp.audio_features(track_uri)[0]['valence'], sp.audio_features(track_uri)[0]['tempo']]
+                audio_features = [float(sp.audio_features(track_uri)[0]['valence']), float(sp.audio_features(track_uri)[0]['tempo'])]
                 songs[track_name] = (audio_features, [playlist_name])
             else:
                 songs[track_name][1].append(playlist_name)
 
-        
-    for song in songs:
-        print("Title:")
-        print(song)
-        print("Valence, Tempo:")
-        print(songs[song][0])
-        print("Playlists where it appears:")
-        print(songs[song][1])
-        print("---------")
+    print(songs)
+    # for song in songs:
+    #     print("Title:")
+    #     print(song)
+    #     print("Valence, Tempo:")
+    #     print(songs[song][0])
+    #     print("Playlists where it appears:")
+    #     print(songs[song][1])
+    #     print("---------")
 
     # at this point, data is an array of 4000 playlists * 11 attributes
     # the 7th attribute/index is a list of songs. Each song is a list of
