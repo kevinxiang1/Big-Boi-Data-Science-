@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+## main imports
 import os
 import urllib
 import re
@@ -11,10 +12,23 @@ from datetime import timedelta, date
 from time import sleep
 from bs4 import BeautifulSoup
 
+## spotify API imports
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+
 def main():
+
     data = []
+
+    # load JSON at index playlists
     with open('full_data.json') as f:
         raw = json.load(f)['playlists']
+
+    # Spotify API objects instantiation
+    client_credentials_manager = SpotifyClientCredentials(client_id='2fd6c37e0dc44ebbbf7275b7a24ce182', client_secret='57b21bdf2a9c4a888a5a75661c1804a2')
+    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
+    songs = dict()
 
     
     for i in range(len(raw)):
@@ -24,19 +38,34 @@ def main():
 
         tracks = data[i][7]
         data[i][7] = []
-        for track in tracks:
+        playlist_name = data[i][0]
+
+        for j, track in enumerate(tracks):
             data[i][7].append(track.values())
-    print(data)
-    return(data)
-    # for i in range(len(data[0])):
-    #     if i !=7: 
-    #         print(data[1][i])
-    #     else:
-    #         for song in data[1][i]:
-    #             print(song)
+
+            track_name = data[i][7][j][4]
+            track_uri = str(data[i][7][j][2])
+
+            if track_name not in songs:
+                audio_features = [sp.audio_features(track_uri)[0]['valence'], sp.audio_features(track_uri)[0]['tempo']]
+                songs[track_name] = (audio_features, [playlist_name])
+            else:
+                songs[track_name][1].append(playlist_name)
+
+        
+    for song in songs:
+        print("Title:")
+        print(song)
+        print("Valence, Tempo:")
+        print(songs[song][0])
+        print("Playlists where it appears:")
+        print(songs[song][1])
+        print("---------")
 
     # at this point, data is an array of 4000 playlists * 11 attributes
     # the 7th attribute/index is a list of songs. Each song is a list of
     # its attributes
+
+
 
 main()
