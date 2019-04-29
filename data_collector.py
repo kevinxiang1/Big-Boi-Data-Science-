@@ -13,6 +13,7 @@ from datetime import timedelta, date
 from time import sleep
 from bs4 import BeautifulSoup
 import time
+import pickle
 
 ## spotify API imports
 import spotipy
@@ -105,10 +106,9 @@ def main():
     playlist2tracks = construct_playlist_to_tracks(main_table)
     tracks2features = construct_song_to_features(sp, main_table, 200)
     save_data(tracks2features)
-    f = open("playlist2tracks.txt", "w")
-    f.write(playlist2tracks)
-    f.close()
+    with open("playlist2tracks.txt", "wb") as fp:
+        pickle.dump(playlist2tracks, fp)
     end = time.time()
-    print("Program ran for:" + str(start-end))
+    print("Program ran for: " + str(end-start) + " seconds")
 
 main()

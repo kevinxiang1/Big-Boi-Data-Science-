@@ -7,6 +7,8 @@ import csv
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 import ast
+import sqlite3
+import hypertools as hyp
 #import kmeans template
 
 def sk_learn_cluster(X, K):
@@ -78,47 +80,54 @@ def main():
 	# The following codes loads the data set into a 2D np array called data
 	# with open('data/word_sentiment.csv') as words_file:
 
-	file = open("./previous data/500_songs.txt", "r")
-	my_dict = ast.literal_eval(file.read())
+	# file = open("./previous data/500_songs.txt", "r")
+	conn = sqlite3.connect('tracks2features.db')
+	c = conn.cursor()
+	c.execute("SELECT * FROM audio_features")
+	rows = c.fetchall()
+
+	# my_dict = ast.literal_eval(file.read())
 	data = []
-	print(len(my_dict.keys())) #this prints the number of songs
-	for key in my_dict.keys():
+	print(len(rows)) #this prints the number of songs
+	for song in rows:
 		cleaned_row = []
-		cleaned_row.append(key)
+		cleaned_row.append(song[0])
 		#only want to input the valence and tempo values, which is a tuple in the first element of the values
-		cleaned_row.append(my_dict[key][0][0])
-		cleaned_row.append(my_dict[key][0][1]/200) #divide by 200 to normalize the tempo
+		cleaned_row.append(song[1])
+		cleaned_row.append(song[2]/200) #divide by 200 to normalize the tempo
+		cleaned_row.append(song[3])
+		cleaned_row.append(song[4])
+		cleaned_row.append(song[5])
 		data.append(np.array(cleaned_row))
 	data = np.array(data)
 	# print(data)
 	"""
-	variable data is now a 2D numpy array, each row being a list of the song name, valence, and tempo
+	variable data is now a 2D numpy array, each row being a list of the song name, valence, tempo, danceability,
+	energy, and speechiness.
+
 	I want to keep it in this format for plot_word_clusters, but for sklearn, I only need the valence 
 	and tempo
 	"""
 	data_points = []
 	for i in range(len(data)):
 		data_points.append(np.float_(data[i][1:]))
-	dat = np.asarray(data_points)
+	data_points = np.asarray(data_points)
 	# print(data_points)
 
-	clusters = np.array([1,2,3,4,5,5,6,7,8])
+	clusters = np.array([1,2,3,4,5,6,7,8])
 	errors = []
 	for item in clusters:
 		kms= KMeans(item)
-		kms.fit_predict(data_points)
+		kmeans_fit = kms.fit_predict(data_points)
+		kmeans_fit = np.reshape(kmeans_fit, (-1, 1))
+		final_clusters = np.concatenate([data_points, kmeans_fit], axis=1)
+		hyp.plot(final_clusters, '.', reduce='TSNE')
 		errors.append(-1*kms.score(data_points)) #score is the error
 	errors = np.asarray(errors)
 	# elbow_point_plot(clusters,errors)
 
-	sklearn_kms = sk_learn_cluster(data_points, 5)
-	plot_word_clusters(data, sklearn_kms[0], sklearn_kms[1])
-
-"""
-NOTE, I removed from "100_playlists.txt" and "songs.txt" this outlier:
-"u'Super Mario Bros - Original': ([0, 0], [u'PlayStation'])"
-because it has 0 tempo and 0 valence
-"""
+	# sklearn_kms = sk_learn_cluster(data_points, 5)
+	# plot_word_clusters(data, sklearn_kms[0], sklearn_kms[1])
 
 
 if __name__ == '__main__':
