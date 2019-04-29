@@ -88,7 +88,6 @@ def main():
 
 	# my_dict = ast.literal_eval(file.read())
 	data = []
-	print(len(rows)) #this prints the number of songs
 	for song in rows:
 		cleaned_row = []
 		cleaned_row.append(song[0])
@@ -96,10 +95,10 @@ def main():
 		cleaned_row.append(song[1])
 		cleaned_row.append(song[2]/200) #divide by 200 to normalize the tempo
 		cleaned_row.append(song[3])
-		cleaned_row.append(song[4])
-		cleaned_row.append(song[5])
-		data.append(np.array(cleaned_row))
-	data = np.array(data)
+		# cleaned_row.append(song[4])
+		# cleaned_row.append(song[5])
+		data.append(cleaned_row)
+	data = np.asarray(data)
 	# print(data)
 	"""
 	variable data is now a 2D numpy array, each row being a list of the song name, valence, tempo, danceability,
@@ -110,21 +109,31 @@ def main():
 	"""
 	data_points = []
 	for i in range(len(data)):
-		data_points.append(np.float_(data[i][1:]))
+		data_points.append(np.float_((data[i][1:])))
 	data_points = np.asarray(data_points)
-	# print(data_points)
+
 
 	clusters = np.array([1,2,3,4,5,6,7,8])
 	errors = []
+	test = [[1, 2, 4], [3, 2, 3], [1, 1, 2]]
+	test = np.array(test)
+	print(test)
+	kms= KMeans(3)
+	kmeans_fit1 = kms.fit_predict(test)
+	print(kmeans_fit1)
+
 	for item in clusters:
 		kms= KMeans(item)
+		data_points = np.reshape(data_points, (-1, 3))
+		print(data_points)
 		kmeans_fit = kms.fit_predict(data_points)
+		print(kmeans_fit)
 		kmeans_fit = np.reshape(kmeans_fit, (-1, 1))
 		final_clusters = np.concatenate([data_points, kmeans_fit], axis=1)
 		hyp.plot(final_clusters, '.', reduce='TSNE')
 		errors.append(-1*kms.score(data_points)) #score is the error
 	errors = np.asarray(errors)
-	# elbow_point_plot(clusters,errors)
+	elbow_point_plot(clusters,errors)
 
 	# sklearn_kms = sk_learn_cluster(data_points, 5)
 	# plot_word_clusters(data, sklearn_kms[0], sklearn_kms[1])
