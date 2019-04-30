@@ -69,7 +69,7 @@ def elbow_point_plot(clusters, errors):
 	fig = plt.plot(clusters,errors)
 	plt.xlabel('Number of Clusters')
 	plt.ylabel('Error')
-	plt.suptitle("Elbow Point Plot: 500 Songs")
+	plt.suptitle("Elbow Point Plot: 200 playlists")
 	plt.show()
 
 def main():
@@ -95,8 +95,8 @@ def main():
 		cleaned_row.append(song[1])
 		cleaned_row.append(song[2]/200) #divide by 200 to normalize the tempo
 		cleaned_row.append(song[3])
-		# cleaned_row.append(song[4])
-		# cleaned_row.append(song[5])
+		cleaned_row.append(song[4])
+		cleaned_row.append(song[5])
 		data.append(cleaned_row)
 	data = np.asarray(data)
 	# print(data)
@@ -110,27 +110,17 @@ def main():
 	data_points = []
 	for i in range(len(data)):
 		data_points.append(np.float_((data[i][1:])))
-	data_points = np.asarray(data_points)
+	data_points = np.array(data_points)
 
-
-	clusters = np.array([1,2,3,4,5,6,7,8])
+	clusters = np.array([3,4,5,6,7,8, 9, 10, 11])
 	errors = []
-	test = [[1, 2, 4], [3, 2, 3], [1, 1, 2]]
-	test = np.array(test)
-	print(test)
-	kms= KMeans(3)
-	kmeans_fit1 = kms.fit_predict(test)
-	print(kmeans_fit1)
 
 	for item in clusters:
-		kms= KMeans(item)
-		data_points = np.reshape(data_points, (-1, 3))
-		print(data_points)
-		kmeans_fit = kms.fit_predict(data_points)
-		print(kmeans_fit)
+		kms= KMeans(n_clusters=item)
+		kmeans_fit = kms.fit(data_points).predict(data_points)
 		kmeans_fit = np.reshape(kmeans_fit, (-1, 1))
 		final_clusters = np.concatenate([data_points, kmeans_fit], axis=1)
-		hyp.plot(final_clusters, '.', reduce='TSNE')
+		hyp.plot(final_clusters, '.', reduce='PCA', n_clusters=item)
 		errors.append(-1*kms.score(data_points)) #score is the error
 	errors = np.asarray(errors)
 	elbow_point_plot(clusters,errors)
