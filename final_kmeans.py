@@ -88,15 +88,31 @@ def main():
 
 	# my_dict = ast.literal_eval(file.read())
 	data = []
+	maxValence = 0
+	maxTempo = 0
+	maxDance = 0
+	maxEnergy = 0
+	maxSpeech = 0
+	for song in rows:
+		if song[1] > maxValence:
+			maxValence = song[1]
+		if song[2] > maxTempo:
+			maxTempo = song[2]
+		if song[3] > maxDance:
+			maxDance = song[3]
+		if song[4] > maxEnergy:
+			maxEnergy = song[4]
+		if song[5] > maxSpeech:
+			maxSpeech = song[5]
 	for song in rows:
 		cleaned_row = []
 		cleaned_row.append(song[0])
 		#only want to input the valence and tempo values, which is a tuple in the first element of the values
-		cleaned_row.append(song[1])
-		cleaned_row.append(song[2]/200) #divide by 200 to normalize the tempo
-		cleaned_row.append(song[3])
-		cleaned_row.append(song[4])
-		cleaned_row.append(song[5])
+		cleaned_row.append(song[1]/maxValence)
+		cleaned_row.append(song[2]/maxTempo) 
+		cleaned_row.append(song[3]/maxDance)
+		cleaned_row.append(song[4]/maxEnergy)
+		cleaned_row.append(song[5]/maxSpeech)
 		data.append(cleaned_row)
 	data = np.asarray(data)
 	# print(data)
@@ -112,7 +128,7 @@ def main():
 		data_points.append(np.float_((data[i][1:])))
 	data_points = np.array(data_points)
 
-	clusters = np.array([3,4,5,6,7,8, 9, 10, 11])
+	clusters = np.array([3,4,5,6,7,8,9,10,11])
 	errors = []
 
 	for item in clusters:
