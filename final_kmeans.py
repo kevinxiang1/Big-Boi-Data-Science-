@@ -9,6 +9,8 @@ from sklearn.cluster import KMeans
 import ast
 import sqlite3
 import hypertools as hyp
+import pickle
+
 #import kmeans template
 
 def sk_learn_cluster(X, K):
@@ -20,8 +22,6 @@ def sk_learn_cluster(X, K):
 	kms = KMeans(K)
 	kms.fit(X)
 	return (kms.cluster_centers_, kms.predict(X))
-
-
 
 
 def plot_word_clusters(data, centroids, centroid_indices):
@@ -81,10 +81,16 @@ def main():
 	# with open('data/word_sentiment.csv') as words_file:
 
 	# file = open("./previous data/500_songs.txt", "r")
-	conn = sqlite3.connect('tracks2features_full.db')
+	conn = sqlite3.connect('./FULL DATA/tracks2features_full.db')
 	c = conn.cursor()
 	c.execute("SELECT * FROM audio_features")
 	rows = c.fetchall()
+	vocab = pickle.load(open("vocab", "rb"))
+
+	new_rows = []
+	for song in rows:
+		if song[0] in vocab:
+			rows.append(song)
 
 	# my_dict = ast.literal_eval(file.read())
 	data = []
@@ -93,7 +99,7 @@ def main():
 	maxDance = 0
 	maxEnergy = 0
 	maxSpeech = 0
-	for song in rows:
+	for song in new_rows:
 		if song[1] > maxValence:
 			maxValence = song[1]
 		if song[2] > maxTempo:
@@ -104,7 +110,7 @@ def main():
 			maxEnergy = song[4]
 		if song[5] > maxSpeech:
 			maxSpeech = song[5]
-	for song in rows:
+	for song in new_rows:
 		cleaned_row = []
 		cleaned_row.append(song[0])
 		cleaned_row.append(song[1]/maxValence)
