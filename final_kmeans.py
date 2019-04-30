@@ -53,7 +53,7 @@ def plot_word_clusters(data, centroids, centroid_indices):
 	plt.scatter(x,y,c = color)
 	plt.xlabel('Danceability: Undanceable --> Danceable')
 	plt.ylabel('Speechiness: Low --> High')
-	plt.suptitle("SciKit-Learn KMeans Clustering: 200 Playlists")
+	plt.suptitle("SciKit-Learn KMeans Clustering: Full")
 	plt.show()
 
 def elbow_point_plot(clusters, errors):
@@ -81,7 +81,7 @@ def main():
 	# with open('data/word_sentiment.csv') as words_file:
 
 	# file = open("./previous data/500_songs.txt", "r")
-	conn = sqlite3.connect('tracks2features.db')
+	conn = sqlite3.connect('tracks2features_full.db')
 	c = conn.cursor()
 	c.execute("SELECT * FROM audio_features")
 	rows = c.fetchall()
@@ -107,11 +107,10 @@ def main():
 	for song in rows:
 		cleaned_row = []
 		cleaned_row.append(song[0])
-		#only want to input the valence and tempo values, which is a tuple in the first element of the values
-		# cleaned_row.append(song[1]/maxValence)
-		# cleaned_row.append(song[2]/maxTempo) 
+		cleaned_row.append(song[1]/maxValence)
+		cleaned_row.append(song[2]/maxTempo) 
 		cleaned_row.append(song[3]/maxDance)
-		# cleaned_row.append(song[4]/maxEnergy)
+		cleaned_row.append(song[4]/maxEnergy)
 		cleaned_row.append(song[5]/maxSpeech)
 		data.append(cleaned_row)
 	data = np.asarray(data)
@@ -128,21 +127,21 @@ def main():
 		data_points.append(np.float_((data[i][1:])))
 	data_points = np.array(data_points)
 
-	clusters = np.array([3,4,5,6,7,8,9,10,11])
+	clusters = np.array([10])
 	errors = []
 
 	for item in clusters:
 		kms= KMeans(n_clusters=item)
 		kmeans_fit = kms.fit(data_points).predict(data_points)
 		kmeans_fit = np.reshape(kmeans_fit, (-1, 1))
-		# final_clusters = np.concatenate([data_points, kmeans_fit], axis=1)
-		# hyp.plot(final_clusters, '.', n_clusters=item)
+		final_clusters = np.concatenate([data_points, kmeans_fit], axis=1)
+		hyp.plot(final_clusters, '.', n_clusters=item)
 		errors.append(-1*kms.score(data_points)) #score is the error
 	errors = np.asarray(errors)
 	elbow_point_plot(clusters,errors)
 
-	sklearn_kms = sk_learn_cluster(data_points, 5)
-	plot_word_clusters(data, sklearn_kms[0], sklearn_kms[1])
+	# sklearn_kms = sk_learn_cluster(data_points, 5)
+	# plot_word_clusters(data, sklearn_kms[0], sklearn_kms[1])
 
 
 if __name__ == '__main__':
