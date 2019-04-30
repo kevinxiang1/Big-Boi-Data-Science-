@@ -19,6 +19,12 @@ import pickle
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
+"""
+    Load the playlist data and initialize the Spotipy object for API calls.
+    returns:
+        raw: the raw playlist data extracted from the JSON document
+        sp: the spotipy object that we will use for API calls
+"""
 def __init__():
     # load JSON at index playlists
     with open('full_data.json') as f:
@@ -29,6 +35,15 @@ def __init__():
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
     return raw, sp
 
+"""
+    Construct the main corpus of the data (a table in which each row
+    is the features of a playlist). the 7th element in each row is
+    a list of lists containing the features of songs within each 
+    playlist.
+    returns:
+        data: the main table that we will be using to extract relevant
+              features about songs and playlists
+"""
 def construct_main_corpus(raw):
     data = []
     for i in range(len(raw)): 
@@ -40,18 +55,19 @@ def construct_main_corpus(raw):
             data[i][7].append(list(track_features.values()))
     return data
 
-
-# DL related data extraction
-    # corpus:
-    # index i is representative of the i-th playlist
-    # at each index, I store a tuple of the format (p, [t1, t2, ..., tn]) where
-    #       p is the playlist title
-    #       ti is the title of the i-th track in p
-    # sentences are playlist names
-    # words are track names
-    # each sentence (playlist) is mapped to the set of words that comprise it (tracks it includes)
-    #
-    # if-clause at the end helps in building a dicionary from track_title -> playlists including the track
+"""
+    "DL related data extraction"
+    Create a mapping from playlists (sentences) to songs that comprise them
+    (words), which will be later used to create a model that identifies the
+    closest songs to a given song using similar techniques to those that we
+    used in the DL assignment.
+    returns:
+        corpus: the mapping from playlist titles to the titles of track within it:
+                index i in corpus is representative of the i-th playlist and 
+                at each index, we store a tuple of the format (p, [t1, t2, ..., tn]):
+                       - p is the playlist title
+                       - tj is the title of the j-th track in p
+"""
 def construct_playlist_to_tracks(data):
     corpus = [[] for i in range(len(data))]
     for i, playlist in enumerate(data):
@@ -63,10 +79,20 @@ def construct_playlist_to_tracks(data):
         corpus[i] = (playlist_title, track_titles)
     return corpus
 
-# Clustering (KMeans and KNN) related data extraction
-def construct_song_to_features(sp, data, howmuch):
+"""
+    "Clustering (KMeans) related data extraction"
+    Create a mapping from songs to a select set of audio features that we want
+    to use to compare them. This is done via API calls to an official Spotify
+    website. We will be using these features to compare songs and cluster them
+    using KMeans.
+    returns:
+        tracks2features: the mapping from track titles to its audio features (valence,
+                         tempo, danceability, energy, speechiness). This is a dictionary
+                         that maps a track title to a list of its audio features.
+"""
+def construct_song_to_features(sp, data):
     tracks2features = dict()
-    for i, playlist in enumerate(data[:howmuch]):
+    for i, playlist in enumerate(data):
         playlist_title = playlist[0]
         for j, track in enumerate(playlist[7]):
             cur_track_title, cur_track_uri = track[4], track[2]
@@ -76,6 +102,10 @@ def construct_song_to_features(sp, data, howmuch):
                 tracks2features[cur_track_title] = relevant_features
     return tracks2features
 
+"""
+    Create a database containing songs and their audio features. We used the techniques
+    we learned in the scraping assignment to construct this database.
+"""
 def save_data(tracks2features):
     # Create connection to database
     conn = sqlite3.connect('tracks2features.db')
@@ -104,7 +134,7 @@ def main():
     raw_data, sp = __init__()
     main_table = construct_main_corpus(raw_data)
     playlist2tracks = construct_playlist_to_tracks(main_table)
-    tracks2features = construct_song_to_features(sp, main_table, 200)
+    tracks2features = construct_song_to_features(sp, main_table)
     save_data(tracks2features)
     with open("playlist2tracks.txt", "wb") as fp:
         pickle.dump(playlist2tracks, fp)
