@@ -1,1 +1,0 @@
-['Sweet Home Alabama', "Sweet Child O' Mine", 'Walk This Way', 'Hotel California - Remastered', 'American Pie', "Free Fallin'", 'Piano Man', 'Take It Easy', 'The Joker', 'Roxanne - Remastered 2003']
