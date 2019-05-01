@@ -21,8 +21,7 @@ def main():
 	# The following codes loads the data set into a 2D np array called data
 	# with open('data/word_sentiment.csv') as words_file:
 
-	# file = open("./previous data/500_songs.txt", "r")
-	conn = sqlite3.connect('./FULL DATA/tracks2features_full.db')
+	conn = sqlite3.connect('./200 PLAYLISTS DATA/tracks2features.db')
 	c = conn.cursor()
 	c.execute("SELECT * FROM audio_features")
 	rows = c.fetchall()
@@ -96,33 +95,18 @@ def main():
 	data5 = np.asarray(data5) #tempo and energy
 	data6 = np.asarray(data6) #danceability and energy
 
-
-
-	"""
-	variable data is now a 2D numpy array, each row being a list of the song name, valence, tempo, danceability,
-	energy.
-	"""
-	# data_points1 = []
-	# data_points2 = []
-	# data_points3 = []
-	# data_points4 = []
-	# data_points5 = []
-	# data_points6 = []
-
-	# for i in range(len(data)):
-	# 	data_points1.append(np.float_((data[i][1:]))) #valence and tempo
-	#     data_points2.append(np.float_((data[i][1:]))) #valence and danceability
-	#     data_points3.append(np.float_((data[i][1:]))) #valence and energy
-	#     data_points4.append(np.float_((data[i][1:]))) #tempo and danceability
-	#     data_points5.append(np.float_((data[i][1:]))) #tempo and energy
-	#     data_points6.append(np.float_((data[i][1:]))) #danceability and energy
-	# data_points = np.array(data_points)
-
 	clusters = 5
 	errors = []
 
 	kms= KMeans(n_clusters=clusters)
 	
+	kms.fit_predict(data1)
+	kms.fit_predict(data2)
+	kms.fit_predict(data3)
+	kms.fit_predict(data4)
+	kms.fit_predict(data5)
+	kms.fit_predict(data6)
+
 	errors.append(-1*kms.score(data1)) #score is the error
 	errors.append(-1*kms.score(data2))
 	errors.append(-1*kms.score(data3))
@@ -133,8 +117,9 @@ def main():
 	x = np.arange(6)
 
 	fig, ax = plt.subplots()
-	# ax.yaxis.set_major_formatter(formatter)
 	plt.bar(x, errors)
+	plt.ylabel('Error')
+	plt.title('Clustering Errors for Audio Feature Pairs')
 	plt.xticks(x, ('V and T', 'V and D', 'V and E', 'T and D', 'T and E', 'D and E'))
 	plt.show()
 
