@@ -1,1 +1,0 @@
-['Hark! The Herald Angels Sing', 'We Three Kings', 'Away in a Manger', 'Auld Lang Syne', 'The First Noel', 'O Come, O Come Emmanuel', 'God Rest Ye Merry Gentlemen', 'What Child Is This', 'O Come All Ye Faithful']
