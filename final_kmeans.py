@@ -81,7 +81,7 @@ def main():
 	# with open('data/word_sentiment.csv') as words_file:
 
 	# file = open("./previous data/500_songs.txt", "r")
-	conn = sqlite3.connect('./FULL DATA/tracks2features_full.db')
+	conn = sqlite3.connect('./DATA/FULL DATA/tracks2features_full.db')
 	c = conn.cursor()
 	c.execute("SELECT * FROM audio_features")
 	rows = c.fetchall()
