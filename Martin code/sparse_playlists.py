@@ -53,7 +53,7 @@ def main():
 	start = time.time() #this is for timing purposes
 
 	data = utils.load_corpus()
-	playlists = data['playlists'] #list of playlists
+	 #list of playlists
 	# print(playlists[0]['tracks'][0]['track_name'])
 
 	"""
@@ -85,6 +85,7 @@ def main():
 	print(np_lookup_table)
 
 	#new stuff
+	playlists = data['playlists']
 	song_id_map = utils.make_dic(playlists)
 	uri_map = {}
 	for k,v in vocab.items():

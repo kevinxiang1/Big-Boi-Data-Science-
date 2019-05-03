@@ -2,17 +2,13 @@ import json
 import numpy as np
 from scipy.spatial.distance import cosine
 import collections
+import pickle
 
 def load_corpus():
     """ Reads the data from disk.
         Returns a list of sentences, where each sentence is split into a list of word tokens
     """
-    # with open(path, "r",encoding='utf-8') as f:
-    #     c = [line.split() for line in f]
-    # return 
-    with open('full_data.json') as f:
-        d = json.load(f)
-    return d
+    return pickle.load(open("DATA/FULL DATA/playlist2tracks_full_artists.txt", "rb"))
 
 def make_corpus(playlists):
     #this makes an empty 2d array of length of playlists (4000)
@@ -50,9 +46,9 @@ def trunc_corpus(corpus, counts, truncated_amount):
     new_corpus = []
     for playlist in corpus:
         new_playlist = []
-        for song in playlist:
-            if song in new_counts.keys():
-                new_playlist.append(song)
+        for song, artist in playlist:
+            if (song, artist) in new_counts.keys():
+                new_playlist.append( (song, artist) )
         new_corpus.append(new_playlist)
     return (new_corpus, new_counts)
 
@@ -73,10 +69,10 @@ def construct_vocab(corpus):
     inverse_vocab = {}
     counter = 0
     for playlist in corpus:
-        for song in playlist:
-            if song not in vocab:
-                vocab[song] = counter
-                inverse_vocab[counter] = song
+        for tup in playlist:
+            if tup not in vocab:
+                vocab[tup] = counter
+                inverse_vocab[counter] = tup
                 counter += 1
     return (vocab, inverse_vocab)
 
@@ -102,60 +98,69 @@ def word_vectors(corpus, vocab, WINDOW_SIZE):
 
     for i in range(len(corpus)):
         for j in range(len(corpus[i])):
-            curr_song = corpus[i][j]
-            curr_id = vocab[curr_song]
+            curr_tup = corpus[i][j]
+            curr_id = vocab[curr_tup]
             for index in context_window:
                 #this is to keep the bounds of the sentence
                 if (j+index >= 0) and (j+index < len(corpus[i])):
-                    song = corpus[i][j+index]
-                    songID = vocab[song]
-                    lookup_table[curr_id][songID] += 1
+                    tup = corpus[i][j+index]
+                    tupID = vocab[tup]
+                    lookup_table[curr_id][tupID] += 1
     
     return lookup_table
 
-def most_similar(lookup_table, wordid, NUM_CLOSEST):
-    """ Helper function (optional).
+# def make_dic(playlists):
+#     dic = {}
+#     for i in range(len(playlists)):
+#         for j in range(len(playlists[i]['tracks'])):
+#             dic[playlists[i]['tracks'][j]['track_name']] = playlists[i]['tracks'][j]['track_uri']
+#     return dic
 
-        Given a lookup table and word vector, find the top most-similar word ids to the given
-        word vector. You can limit this to the first NUM_CLOSEST results.
-    """
-    # raise NotImplementedError("most_similar")\
-    largest = 0 #largest value of scipy cosine means least similar
-    largestPair = ()
-    smallest = 1 # smallest value of scipy cosine means most similar
-    smallestPair = ()
-    distances = np.zeros((len(lookup_table), len(lookup_table)))
 
-    #using scipy cosine, if cos = 1, then they are least similar, and if cos = 0, they are most
-    for i in range(len(lookup_table)):
-        for j in range(len(lookup_table)):
-    # index i also represents the id of each word
-            val = cosine(lookup_table[i], lookup_table[j])
-            distances[i][j] = val
-            # print(val)
-            # if val > largest and val != 1:
-            if val > largest:
-                largest = val
-                largestPair = (i,j)
-            elif val < smallest and val != 0:
-                smallest = val
-                smallestPair = (i,j)
-    # to get the twenty most common words, since I inputted the wordID, I can navigate to 
-    # the corresponding row in distances. That row will show the distances between this word
-    # and all the other words in the vocabulary, so I just need to find the top 20.
-    distances_from_word = []
-    for i in range(len(distances[wordid])):
-        if i != wordid:
-            distances_from_word.append((i, distances[wordid][i]))
-    # print(distances_from_word)
+# NOT USED ANYMORE
+# def most_similar(lookup_table, wordid, NUM_CLOSEST):
+#     """ Helper function (optional).
 
-    #this gives the NUM_CLOSEST most similar distances
-    sorted_distances = sorted(distances_from_word, key = lambda x: x[1])[:NUM_CLOSEST]
-    sorted_ids = []
-    for item in sorted_distances:
-        sorted_ids.append(item[0])
-    # print(sorted_ids)
-    return distances, largestPair, smallestPair, sorted_ids
+#         Given a lookup table and word vector, find the top most-similar word ids to the given
+#         word vector. You can limit this to the first NUM_CLOSEST results.
+#     """
+#     # raise NotImplementedError("most_similar")\
+#     largest = 0 #largest value of scipy cosine means least similar
+#     largestPair = ()
+#     smallest = 1 # smallest value of scipy cosine means most similar
+#     smallestPair = ()
+#     distances = np.zeros((len(lookup_table), len(lookup_table)))
+
+#     #using scipy cosine, if cos = 1, then they are least similar, and if cos = 0, they are most
+#     for i in range(len(lookup_table)):
+#         for j in range(len(lookup_table)):
+#     # index i also represents the id of each word
+#             val = cosine(lookup_table[i], lookup_table[j])
+#             distances[i][j] = val
+#             # print(val)
+#             # if val > largest and val != 1:
+#             if val > largest:
+#                 largest = val
+#                 largestPair = (i,j)
+#             elif val < smallest and val != 0:
+#                 smallest = val
+#                 smallestPair = (i,j)
+#     # to get the twenty most common words, since I inputted the wordID, I can navigate to 
+#     # the corresponding row in distances. That row will show the distances between this word
+#     # and all the other words in the vocabulary, so I just need to find the top 20.
+#     distances_from_word = []
+#     for i in range(len(distances[wordid])):
+#         if i != wordid:
+#             distances_from_word.append((i, distances[wordid][i]))
+#     # print(distances_from_word)
+
+#     #this gives the NUM_CLOSEST most similar distances
+#     sorted_distances = sorted(distances_from_word, key = lambda x: x[1])[:NUM_CLOSEST]
+#     sorted_ids = []
+#     for item in sorted_distances:
+#         sorted_ids.append(item[0])
+#     # print(sorted_ids)
+#     return distances, largestPair, smallestPair, sorted_ids
 
 
 
