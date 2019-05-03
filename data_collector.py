@@ -71,12 +71,11 @@ def construct_main_corpus(raw):
 def construct_playlist_to_tracks(data):
     corpus = [[] for i in range(len(data))]
     for i, playlist in enumerate(data):
-        playlist_title = playlist[0]
-        track_titles = []
+        tracks = []
         for j, track in enumerate(playlist[7]):
-            cur_track_title, cur_track_uri = track[4], track[2]
-            track_titles.append(cur_track_title)
-        corpus[i] = (playlist_title, track_titles)
+            cur_track_title, cur_track_artist = track[4], track[1]
+            tracks.append( (cur_track_title, cur_track_artist) )
+        corpus[i] = tracks
     return corpus
 
 """
@@ -134,8 +133,8 @@ def main():
     raw_data, sp = __init__()
     main_table = construct_main_corpus(raw_data)
     playlist2tracks = construct_playlist_to_tracks(main_table)
-    tracks2features = construct_song_to_features(sp, main_table)
-    save_data(tracks2features)
+    # tracks2features = construct_song_to_features(sp, main_table)
+    # save_data(tracks2features)
     with open("playlist2tracks.txt", "wb") as fp:
         pickle.dump(playlist2tracks, fp)
     end = time.time()

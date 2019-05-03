@@ -52,8 +52,8 @@ def main():
 
 	start = time.time() #this is for timing purposes
 
-	data = utils.load_corpus()
-	playlists = data['playlists'] #list of playlists
+	# data = utils.load_corpus()
+	# playlists = data['playlists'] #list of playlists
 	# print(playlists[0]['tracks'][0]['track_name'])
 
 	"""
@@ -61,7 +61,11 @@ def main():
 	being a playlist, and then each element in that list to be the songs 
 	in that list
 	"""
-	corpus = utils.make_corpus(playlists)
+	# corpus = utils.make_corpus(playlists)
+	# 
+	corpus = pickle.load(open("DATA/FULL DATA/playlist2tracks_full_artists.txt", "rb"))
+	print(corpus[0])
+
 
 	#avg length of playlists is the avg length of each row of corpus
 	avg_playlist_len = utils.avgLength(corpus)
