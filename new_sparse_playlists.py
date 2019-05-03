@@ -52,8 +52,8 @@ def main():
 
 	start = time.time() #this is for timing purposes
 
-	data = utils.load_corpus()
-	playlists = data['playlists'] #list of playlists
+	# data = utils.load_corpus()
+	 #list of playlists
 	# print(playlists[0]['tracks'][0]['track_name'])
 
 	"""
@@ -61,7 +61,11 @@ def main():
 	being a playlist, and then each element in that list to be the songs 
 	in that list
 	"""
-	corpus = utils.make_corpus(playlists)
+	# corpus = utils.make_corpus(playlists)
+	# 
+	corpus = utils.load_corpus()
+	# print(corpus)
+
 
 	#avg length of playlists is the avg length of each row of corpus
 	avg_playlist_len = utils.avgLength(corpus)
@@ -82,20 +86,22 @@ def main():
 	#generating lookup table
 	lookup_table = utils.word_vectors(trunc_corpus, vocab, WINDOW_SIZE)
 	np_lookup_table = np.asarray(lookup_table)
+	print("Lookup table:")
 	print(np_lookup_table)
 
 	#new stuff
-	song_id_map = utils.make_dic(playlists)
-	uri_map = {}
-	for k,v in vocab.items():
-		uri_map[k] = song_id_map[k]
+	# playlists = data['playlists']
+	# song_id_map = utils.make_dic(playlists)
+	# uri_map = {}
+	# for k,v in vocab.items():
+	# 	uri_map[k] = song_id_map[k]
 
 	np.save('lookup_table', np_lookup_table)
 	# np.save('inverse_vocab', inverse_vocab)
 	pickle.dump(inverse_vocab, open('inverse_vocab', "wb"))
 	pickle.dump(vocab, open('vocab', "wb"))
-	pickle.dump(uri_map, open('song_to_uri', "wb"))
 	np.save('playlist', trunc_corpus)
+	# pickle.dump(uri_map, open('song_to_uri', "wb"))
 	# np.save('song_to_uri', uri_map)
 
 	# NOTE: To find the most similar song to a particular song, edit the second argument in 

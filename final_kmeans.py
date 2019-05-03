@@ -99,6 +99,7 @@ def main():
 	maxDance = 0
 	maxEnergy = 0
 	maxSpeech = 0
+	#finds maximum values for each audio feature in data set
 	for song in new_rows:
 		if song[1] > maxValence:
 			maxValence = song[1]
@@ -110,6 +111,8 @@ def main():
 			maxEnergy = song[4]
 		if song[5] > maxSpeech:
 			maxSpeech = song[5]
+	
+	#creates array of songs with all of their audio features, normalized by the corresponding max values
 	for song in new_rows:
 		cleaned_row = []
 		cleaned_row.append(song[0])
@@ -136,12 +139,13 @@ def main():
 	clusters = np.array([10])
 	errors = []
 
+	
 	for item in clusters:
 		kms= KMeans(n_clusters=item)
 		kmeans_fit = kms.fit(data_points).predict(data_points)
-		kmeans_fit = np.reshape(kmeans_fit, (-1, 1))
-		final_clusters = np.concatenate([data_points, kmeans_fit], axis=1)
-		hyp.plot(final_clusters, '.', n_clusters=item)
+		kmeans_fit = np.reshape(kmeans_fit, (-1, 1)) #prepare for concetenations
+		final_clusters = np.concatenate([data_points, kmeans_fit], axis=1) #adds cluster IDs to numpy arrays
+		hyp.plot(final_clusters, '.', n_clusters=item) #PCA analysis default
 		errors.append(-1*kms.score(data_points)) #score is the error
 	errors = np.asarray(errors)
 	elbow_point_plot(clusters,errors)

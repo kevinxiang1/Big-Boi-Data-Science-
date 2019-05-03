@@ -45,7 +45,7 @@ def main():
 	maxDance = 0
 	maxEnergy = 0
 
-
+	#calculates maximum values of each audio feature in our dataset
 	for song in rows:
 		if song[1] > maxValence:
 			maxValence = song[1]
@@ -55,7 +55,8 @@ def main():
 			maxDance = song[3]
 		if song[4] > maxEnergy:
 			maxEnergy = song[4]
-
+			
+	#creates arrays of the combinations of audio feature pairs for each song
 	for song in rows:
 		cleaned_row = []
 		cleaned_row.append(song[1]/maxValence)
@@ -87,7 +88,7 @@ def main():
 		cleaned_row.append(song[4]/maxEnergy)
 		data6.append(cleaned_row)
 		
-
+	#turns above arrays into numpy arrays
 	data1 = np.asarray(data1) #valence and tempo
 	data2 = np.asarray(data2) #valence and danceability
 	data3 = np.asarray(data3) #valence and energy
@@ -100,6 +101,7 @@ def main():
 
 	kms= KMeans(n_clusters=clusters)
 	
+	#run kmeans clustering on audio feature pairs
 	kms.fit_predict(data1)
 	kms.fit_predict(data2)
 	kms.fit_predict(data3)
@@ -116,6 +118,7 @@ def main():
 	
 	x = np.arange(6)
 
+	#creates bar chart
 	fig, ax = plt.subplots()
 	plt.bar(x, errors)
 	plt.ylabel('Error')
