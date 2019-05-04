@@ -107,7 +107,7 @@ def construct_song_to_features(sp, data):
 """
 def save_data(tracks2features):
     # Create connection to database
-    conn = sqlite3.connect('tracks2features.db')
+    conn = sqlite3.connect('tracks2features_full.db')
     c = conn.cursor()
 
     # Delete tables if they exist
@@ -133,9 +133,9 @@ def main():
     raw_data, sp = __init__()
     main_table = construct_main_corpus(raw_data)
     playlist2tracks = construct_playlist_to_tracks(main_table)
-    # tracks2features = construct_song_to_features(sp, main_table)
-    # save_data(tracks2features)
-    with open("playlist2tracks.txt", "wb") as fp:
+    tracks2features = construct_song_to_features(sp, main_table)
+    save_data(tracks2features)
+    with open("playlist2tracks_full.txt", "wb") as fp:
         pickle.dump(playlist2tracks, fp)
     end = time.time()
     print("Program ran for: " + str(end-start) + " seconds")
