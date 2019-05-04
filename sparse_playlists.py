@@ -15,10 +15,10 @@ README
 This program, alongside utils_playlists.py, creates a similarity matrix
 using song vectors and context windows.
 
-IMPORTANT: It draws data from the playlist2tracks_full_artists.txt file
+IMPORTANT: It draws data from the playlist2tracks_full.txt file
 
 Just to clarify, our full_data.json includes 4000 playlists with approximately
-not unique 500,000 songs, and playlist2tracks_full_artists is a txt file from our main db.
+not unique 500,000 songs, and playlist2tracks_full is a txt file from our main db.
 
 """
 
@@ -88,7 +88,7 @@ def plot_with_labels(low_dim_embs, labels, filename):
 
   plt.savefig(filename)
 
-def main():
+def vectorization():
     #hyperparameter
     NUM_CLOSEST = 5 #controls the number of closest songs the the song you want
     TRUNC_AMOUNT = 5000 #this controls how many top songs you want to keep in truncation
@@ -124,13 +124,15 @@ def main():
     print("Lookup table:")
     print(lookup_table)
 
-    clustering(lookup_table, vocab, inverse_vocab)
+    return lookup_table, vocab, inverse_vocab
 
 #Helper function containing all clustering and playlist generation logic.
-def clustering(lookup_table, vocab, inverse_vocab):
-    #cosine similarity between each row of look_up table
+def cluster(lookup_table, vocab, inverse_vocab):
+    # cosine similarity between each row of look_up table
     distances = squareform(pdist(lookup_table, 'cosine'))
-    np.save('distances',distances)
+    
+    # save distances for future use since it is a time-consuming task
+    # np.save('distances',distances)
 
     # load distances if generated already since this takes time for a large dataset
     # distances = np.load('distances.npy')
@@ -142,18 +144,17 @@ def clustering(lookup_table, vocab, inverse_vocab):
     #dimensionally reduce 5000 features into 2 using TSNE, and saving this file in current directory.
     #Take around 15 minutes for 5000 songs
     low_dim_embs = tsne.fit_transform(distances)
+
+    # dump low_dim_embs for future use since it is a time-consuming task
     pickle.dump(low_dim_embs, open('low_dim_embs', "wb"))
 
     labels = [inverse_vocab[i] for i in range(len(distances))]
 
-    #load dimensionally reduced matrix if exits.
+    # load dimensionally reduced matrix if exits.
     # low_dim_embs = pickle.load(open("low_dim_embs", "rb")
-    #plot_with_labels(low_dim_embs, labels, 'tsne.png')
+    # plot_with_labels(low_dim_embs, labels, 'tsne.png')
 
-
-
-
-    #code to determine optimum number of clusters to use, based on error plot result
+    # code to determine optimum number of clusters to use, based on error plot result
     K = []
     error = []
     for i in range(1, 10):
@@ -167,7 +168,7 @@ def clustering(lookup_table, vocab, inverse_vocab):
     elbow_point_plot(np.array(K), np.array(error))
 
 
-    #visualizes the clustering results, and generates playlist
+    # visualizes the clustering results, and generates playlist
     kMeans = KMeans(n_clusters = 6, max_iter = 50).fit(low_dim_embs)
     indices = kMeans.labels_
     data = []
@@ -175,21 +176,26 @@ def clustering(lookup_table, vocab, inverse_vocab):
         data.append([title, low_dim_embs[index][0], low_dim_embs[index][1]])
     data = np.array(data)
     centers = kMeans.cluster_centers_
-    #graph plot
+    # graph plot
     plot_word_clusters(data, centers, indices)
-    #create dictionary where key is playlist number, and value is array of songs in the playlist
+    # create dictionary where key is playlist number, and value is array of songs in the playlist
     playlists = {}
     for i in range(0, len(centers)):
         playlists[i] = []
     for  index, value in enumerate(indices):
         playlists[value].append(inverse_vocab[index])
 
+    # playlist generating code
     for k in playlists:
         songs = playlists[k]
         for index, song in enumerate(songs):
-            #outputs song to playlist file in sub-directory
+            # outputs song to playlist file in sub-directory
             print(song, file= open('playlists/playlist'+str(k)+'.txt', 'a+'))
     print(len(distances))
+
+def main():
+    lookup_table, vocab, inverse_vocab = vectorization()
+    cluster(lookup_table, vocab, inverse_vocab)
 
 
 if __name__ == '__main__':
