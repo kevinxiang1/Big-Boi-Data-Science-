@@ -4,7 +4,9 @@ import random
 import numpy.matlib
 import math
 import csv
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("TKAgg")
+from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 import ast
 import sqlite3
@@ -81,25 +83,36 @@ def main():
 	# with open('data/word_sentiment.csv') as words_file:
 
 	# file = open("./previous data/500_songs.txt", "r")
-	conn = sqlite3.connect('./DATA/FULL DATA/tracks2features_full.db')
-	c = conn.cursor()
-	c.execute("SELECT * FROM audio_features")
-	rows = c.fetchall()
-	vocab = pickle.load(open("vocab", "rb"))
+	# conn = sqlite3.connect('tracks2features_full.db')
+	# c = conn.cursor()
+	# c.execute("SELECT * FROM audio_features")
+	# rows = c.fetchall()
+	with open('5000_db_truncated.csv') as f:
+		reader = csv.reader(f)
+		print(reader)
+		rows = list(reader)
+		rows = rows[1:]
 
-	new_rows = []
-	for song in rows:
-		if song[0] in vocab:
-			rows.append(song)
 
-	# my_dict = ast.literal_eval(file.read())
+
+	# vocab = pickle.load(open("vocab", "rb"))
+
+	# new_rows = []
+	# for song in rows:
+	# 	if song[0] in vocab:
+	# 		rows.append(song)
 	data = []
 	maxValence = 0
 	maxTempo = 0
 	maxDance = 0
 	maxEnergy = 0
-	maxSpeech = 0
-	#finds maximum values for each audio feature in data set
+	# maxSpeech = 0
+	new_rows = []
+	for row in rows:
+		x = [float(feature) for feature in row[1:]] 
+		# print("x is" + str(x))
+		new_rows.append([row[0]]+ x)
+	# print(type(new_rows[0][3]))
 	for song in new_rows:
 		if song[1] > maxValence:
 			maxValence = song[1]
@@ -109,10 +122,8 @@ def main():
 			maxDance = song[3]
 		if song[4] > maxEnergy:
 			maxEnergy = song[4]
-		if song[5] > maxSpeech:
-			maxSpeech = song[5]
-	
-	#creates array of songs with all of their audio features, normalized by the corresponding max values
+		# if song[5] > maxSpeech:
+		# 	maxSpeech = song[5]
 	for song in new_rows:
 		cleaned_row = []
 		cleaned_row.append(song[0])
@@ -120,10 +131,10 @@ def main():
 		cleaned_row.append(song[2]/maxTempo) 
 		cleaned_row.append(song[3]/maxDance)
 		cleaned_row.append(song[4]/maxEnergy)
-		cleaned_row.append(song[5]/maxSpeech)
+		# cleaned_row.append(song[5]/maxSpeech)
 		data.append(cleaned_row)
 	data = np.asarray(data)
-	# print(data)
+	print(data)
 	"""
 	variable data is now a 2D numpy array, each row being a list of the song name, valence, tempo, danceability,
 	energy, and speechiness.
@@ -135,20 +146,34 @@ def main():
 	for i in range(len(data)):
 		data_points.append(np.float_((data[i][1:])))
 	data_points = np.array(data_points)
-
-	clusters = np.array([10])
+	print(data_points)
+	clusters = np.array([1,2,3,4,5,6,7,8,9,10])
 	errors = []
 
-	
-	for item in clusters:
-		kms= KMeans(n_clusters=item)
-		kmeans_fit = kms.fit(data_points).predict(data_points)
-		kmeans_fit = np.reshape(kmeans_fit, (-1, 1)) #prepare for concetenations
-		final_clusters = np.concatenate([data_points, kmeans_fit], axis=1) #adds cluster IDs to numpy arrays
-		hyp.plot(final_clusters, '.', n_clusters=item) #PCA analysis default
-		errors.append(-1*kms.score(data_points)) #score is the error
-	errors = np.asarray(errors)
-	elbow_point_plot(clusters,errors)
+	# for item in clusters:
+		#kms = KMeans(n_clusters = item)
+	# 	kmeans_fit = kms.fit(data_points).predict(data_points)
+	# 	kmeans_fit = np.reshape(kmeans_fit, (-1, 1))
+	# 	final_clusters = np.concatenate([data_points, kmeans_fit], axis=1)
+	# 	# hyp.plot(final_clusters, '.', n_clusters=item)
+	# 	errors.append(-1*kms.score(data_points)) #score is the error
+	# errors = np.asarray(errors)
+	# # print(errors)
+	# elbow_point_plot(clusters,errors)
+
+	kMeans = KMeans(n_clusters = 500, max_iter = 50).fit(data_points)
+	indices = kMeans.labels_
+	centers = kMeans.cluster_centers_
+	playlists = {}
+	for i in range(0, len(centers)):
+		playlists[i] = []
+	for  index, value in enumerate(indices):
+		playlists[value].append(data[index][0])
+	for k in playlists:
+		songs = playlists[k]
+		for index, song in enumerate(songs):
+			print(song, file= open('audio_playlists/playlist'+str(k)+'.txt', 'a+'))
+
 
 	# sklearn_kms = sk_learn_cluster(data_points, 5)
 	# plot_word_clusters(data, sklearn_kms[0], sklearn_kms[1])
