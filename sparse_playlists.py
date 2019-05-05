@@ -132,7 +132,7 @@ def cluster(lookup_table, vocab, inverse_vocab):
     distances = squareform(pdist(lookup_table, 'cosine'))
     
     # save distances for future use since it is a time-consuming task
-    # np.save('distances',distances)
+    np.save('distances',distances)
 
     # load distances if generated already since this takes time for a large dataset
     # distances = np.load('distances.npy')
@@ -142,16 +142,16 @@ def cluster(lookup_table, vocab, inverse_vocab):
         perplexity=30, n_components=2, init='pca', n_iter=1000, method='exact')
 
     #dimensionally reduce 5000 features into 2 using TSNE, and saving this file in current directory.
-    #Take around 15 minutes for 5000 songs
+    #Take around 30 minutes for 5000 songs
     low_dim_embs = tsne.fit_transform(distances)
 
-    # dump low_dim_embs for future use since it is a time-consuming task
+    # # dump low_dim_embs for future use since it is a time-consuming task
     pickle.dump(low_dim_embs, open('low_dim_embs', "wb"))
 
     labels = [inverse_vocab[i] for i in range(len(distances))]
 
     # load dimensionally reduced matrix if exits.
-    # low_dim_embs = pickle.load(open("low_dim_embs", "rb")
+    # low_dim_embs = pickle.load(open("low_dim_embs", "rb"))
     # plot_with_labels(low_dim_embs, labels, 'tsne.png')
 
     # code to determine optimum number of clusters to use, based on error plot result
@@ -169,7 +169,7 @@ def cluster(lookup_table, vocab, inverse_vocab):
 
 
     # visualizes the clustering results, and generates playlist
-    kMeans = KMeans(n_clusters = 6, max_iter = 50).fit(low_dim_embs)
+    kMeans = KMeans(n_clusters = 500, max_iter = 50).fit(low_dim_embs)
     indices = kMeans.labels_
     data = []
     for index, title in enumerate(labels):
@@ -186,12 +186,12 @@ def cluster(lookup_table, vocab, inverse_vocab):
         playlists[value].append(inverse_vocab[index])
 
     # playlist generating code
+    
     for k in playlists:
         songs = playlists[k]
         for index, song in enumerate(songs):
             # outputs song to playlist file in sub-directory
-            print(song, file= open('playlists/playlist'+str(k)+'.txt', 'a+'))
-    print(len(distances))
+            print(song[0] + " - " + song[1], file= open('playlists/playlist'+str(k)+'.txt', 'a+'))
 
 def main():
     lookup_table, vocab, inverse_vocab = vectorization()
