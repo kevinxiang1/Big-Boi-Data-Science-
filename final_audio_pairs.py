@@ -26,7 +26,7 @@ def sk_learn_cluster(X, K):
 	return (kms.cluster_centers_, kms.predict(X))
 
 
-def plot_word_clusters(data, centroids, centroid_indices, x, y):
+def plot_word_clusters(data, centroids, centroid_indices, x_axis, y_axis):
 	"""
 	:param data - the data set stores as a 2D np array (given in the main function stencil)
 	:param centroids - the coordinates that represent the center of the clusters
@@ -53,8 +53,8 @@ def plot_word_clusters(data, centroids, centroid_indices, x, y):
 	# for i, txt in enumerate(Y):
 	# 	ax.annotate(txt, (x[i], y[i]))
 	plt.scatter(x,y,c = color)
-	plt.xlabel(x)
-	plt.ylabel(y)
+	plt.xlabel(x_axis)
+	plt.ylabel(y_axis)
 	plt.suptitle("SciKit-Learn KMeans Clustering: 5000 songs")
 	plt.show()
 
@@ -92,7 +92,6 @@ def main():
 		rows = list(reader)
 		rows = rows[1:]
 
-	data = []
 	maxValence = 0
 	maxTempo = 0
 	maxDance = 0
@@ -115,57 +114,118 @@ def main():
 			maxEnergy = song[4]
 		# if song[5] > maxSpeech:
 		# 	maxSpeech = song[5]
+	
+	data1 = []
+	data2 = []
+	data3 = []
+	data4 = []
+	data5 = []
+	data6 = []
+
+	fulldata1 = []
+	fulldata2 = []
+	fulldata3 = []
+	fulldata4 = []
+	fulldata5 = []
+	fulldata6 = []
+
+	#calculates maximum values of each audio feature in our dataset
+	for song in new_rows:
+		if song[1] > maxValence:
+			maxValence = song[1]
+		if song[2] > maxTempo:
+			maxTempo = song[2]
+		if song[3] > maxDance:
+			maxDance = song[3]
+		if song[4] > maxEnergy:
+			maxEnergy = song[4]
+			
+	#creates arrays of the combinations of audio feature pairs for each song
 	for song in new_rows:
 		cleaned_row = []
 		cleaned_row.append(song[0])
 		cleaned_row.append(song[1]/maxValence)
 		cleaned_row.append(song[2]/maxTempo) 
+		fulldata1.append(cleaned_row)
+		super_clean_row = cleaned_row[1:]
+		data1.append(super_clean_row)
+	
+
+	for song in new_rows:
+		cleaned_row = []
+		cleaned_row.append(song[0])
+		cleaned_row.append(song[1]/maxValence)
+		cleaned_row.append(song[3]/maxDance) 
+		fulldata2.append(cleaned_row)
+		super_clean_row = cleaned_row[1:]
+		data2.append(super_clean_row)
+	for song in new_rows:
+		cleaned_row = []
+		cleaned_row.append(song[0])
+		cleaned_row.append(song[1]/maxValence)
+		cleaned_row.append(song[4]/maxEnergy)
+		fulldata3.append(cleaned_row)
+		super_clean_row = cleaned_row[1:]
+		data3.append(super_clean_row)
+	for song in new_rows:
+		cleaned_row = []
+		cleaned_row.append(song[0])
+		cleaned_row.append(song[2]/maxTempo)
+		cleaned_row.append(song[3]/maxDance)
+		fulldata4.append(cleaned_row)
+		super_clean_row = cleaned_row[1:]
+		data4.append(super_clean_row)
+	for song in new_rows:
+		cleaned_row = []
+		cleaned_row.append(song[0])
+		cleaned_row.append(song[2]/maxTempo)
+		cleaned_row.append(song[4]/maxEnergy)
+		fulldata5.append(cleaned_row)
+		super_clean_row = cleaned_row[1:]
+		data5.append(super_clean_row)
+	for song in new_rows:
+		cleaned_row = []
+		cleaned_row.append(song[0])
 		cleaned_row.append(song[3]/maxDance)
 		cleaned_row.append(song[4]/maxEnergy)
-		# cleaned_row.append(song[5]/maxSpeech)
-		data.append(cleaned_row)
-	data = np.asarray(data)
-	"""
-	variable data is now a 2D numpy array, each row being a list of the song name, valence, tempo, danceability,
-	energy, and speechiness.
+		fulldata6.append(cleaned_row)
+		super_clean_row = cleaned_row[1:]
+		data6.append(super_clean_row)
+	
+	#turns above arrays into numpy arrays
+	data1 = np.asarray(data1) #valence and tempo
+	data2 = np.asarray(data2) #valence and danceability
+	data3 = np.asarray(data3) #valence and energy
+	data4 = np.asarray(data4) #tempo and danceability
+	data5 = np.asarray(data5) #tempo and energy
+	data6 = np.asarray(data6) #danceability and energy
 
-	I want to keep it in this format for plot_word_clusters, but for sklearn, I only need the valence 
-	and tempo
-	"""
-	data_points = []
-	for i in range(len(data)):
-		data_points.append(np.float_((data[i][1:])))
-	data_points = np.array(data_points)
-	# clusters = np.array([1,2,3,4,5,6,7,8,9,10])
-	# errors = []
+	fulldata1 = np.asarray(fulldata1) #valence and tempo
+	fulldata2 = np.asarray(fulldata2) #valence and danceability
+	fulldata3 = np.asarray(fulldata3) #valence and energy
+	fulldata4 = np.asarray(fulldata4) #tempo and danceability
+	fulldata5 = np.asarray(fulldata5) #tempo and energy
+	fulldata6 = np.asarray(fulldata6) #danceability and energy
 
-	# for item in clusters:
-		#kms = KMeans(n_clusters = item)
-	# 	kmeans_fit = kms.fit(data_points).predict(data_points)
-	# 	kmeans_fit = np.reshape(kmeans_fit, (-1, 1))
-	# 	final_clusters = np.concatenate([data_points, kmeans_fit], axis=1)
-	# 	# hyp.plot(final_clusters, '.', n_clusters=item)
-	# 	errors.append(-1*kms.score(data_points)) #score is the error
-	# errors = np.asarray(errors)
-	# # print(errors)
-	# elbow_point_plot(clusters,errors)
+	sklearn_kms1 = sk_learn_cluster(data1, 5)
+	plot_word_clusters(fulldata1, sklearn_kms1[0], sklearn_kms1[1], 'Valence', 'Tempo')
 
-	kMeans = KMeans(n_clusters = 500, max_iter = 50).fit(data_points)
-	indices = kMeans.labels_
-	centers = kMeans.cluster_centers_
-	playlists = {}
-	for i in range(0, len(centers)):
-		playlists[i] = []
-	for  index, value in enumerate(indices):
-		playlists[value].append(data[index][0])
-	for k in playlists:
-		songs = playlists[k]
-		for index, song in enumerate(songs):
-			print(song, file=open('audio_playlists/playlist'+str(k)+'.txt', 'a+'))
+	sklearn_kms2 = sk_learn_cluster(data2, 5)
+	plot_word_clusters(fulldata2, sklearn_kms2[0], sklearn_kms2[1], 'Valence', 'Danceability')
+
+	sklearn_kms3 = sk_learn_cluster(data3, 5)
+	plot_word_clusters(fulldata3, sklearn_kms3[0], sklearn_kms3[1], 'Valence', 'Energy')
+
+	sklearn_kms4 = sk_learn_cluster(data4, 5)
+	plot_word_clusters(fulldata4, sklearn_kms4[0], sklearn_kms4[1], 'Tempo', 'Danceability')
+
+	sklearn_kms5 = sk_learn_cluster(data5, 5)
+	plot_word_clusters(fulldata5, sklearn_kms5[0], sklearn_kms5[1], 'Tempo', 'Energy')
+
+	sklearn_kms6 = sk_learn_cluster(data6, 5)
+	plot_word_clusters(fulldata6, sklearn_kms6[0], sklearn_kms6[1], 'Energy', 'Danceability')
 
 
-	# sklearn_kms = sk_learn_cluster(data_points, 5)
-	# plot_word_clusters(data, sklearn_kms[0], sklearn_kms[1])
 
 
 if __name__ == '__main__':
