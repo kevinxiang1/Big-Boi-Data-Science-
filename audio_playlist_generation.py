@@ -162,10 +162,12 @@ def main():
 	indices = kMeans.labels_
 	centers = kMeans.cluster_centers_
 	playlists = {}
+
 	for i in range(0, len(centers)):
 		playlists[i] = []
 	for  index, value in enumerate(indices):
 		playlists[value].append(data[index][0])
+	
 	for k in playlists:
 		songs = playlists[k]
 		for index, song in enumerate(songs):
