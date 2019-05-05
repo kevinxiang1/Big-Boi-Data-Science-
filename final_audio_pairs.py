@@ -58,22 +58,6 @@ def plot_word_clusters(data, centroids, centroid_indices, x_axis, y_axis):
 	plt.suptitle("SciKit-Learn KMeans Clustering: 5000 songs")
 	plt.show()
 
-def elbow_point_plot(clusters, errors):
-	"""
-	This function helps create a plot representing the tradeoff between the number of clusters
-	and the mean squared error.
-
-	:param cluster: 1D np array that represents K (the number of clusters)
-	:param errors: 1D np array that represents the mean squared error
-
-	WHEN THIS PRINTS, RESCALE THE WINDOW TO SHOW THE AXES
-	"""
-	fig = plt.plot(clusters,errors)
-	plt.xlabel('Number of Clusters')
-	plt.ylabel('Error')
-	plt.suptitle("Elbow Point Plot: 200 playlists")
-	plt.show()
-
 def main():
 	"""
 	This function loads the data set as a 2D numpy array in the data variable

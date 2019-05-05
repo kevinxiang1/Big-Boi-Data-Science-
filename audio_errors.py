@@ -4,7 +4,8 @@ import random
 import numpy.matlib
 import math
 import csv
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('TkAgg')
 from sklearn.cluster import KMeans
 import ast
 import sqlite3
@@ -13,26 +14,25 @@ import pickle
 
 #import kmeans template
 
+plt = matplotlib.pyplot
+
 def main():
 	"""
 	This function loads the data set as a 2D numpy array in the data variable
 	"""
 
-	# The following codes loads the data set into a 2D np array called data
-	# with open('data/word_sentiment.csv') as words_file:
+	# The following codes loads the data set into 2D np arrays
 
-	conn = sqlite3.connect('./200 PLAYLISTS DATA/tracks2features.db')
-	c = conn.cursor()
-	c.execute("SELECT * FROM audio_features")
-	rows = c.fetchall()
-	# vocab = pickle.load(open("vocab", "rb"))
+	with open('./DATA/FULL DATA TRUNCATED/tracks2features_full_truncated.csv') as f:
+		reader = csv.reader(f)
+		rows = list(reader)
+		rows = rows[1:]
 
-	# new_rows = []
-	# for song in rows:
-	# 	if song[0] in vocab:
-	# 		rows.append(song)
+	new_rows = []
+	for row in rows:
+		x = [float(feature) for feature in row[1:]] 
+		new_rows.append([row[0]]+ x)
 
-	# my_dict = ast.literal_eval(file.read())
 	data1 = []
 	data2 = []
 	data3 = []
@@ -46,7 +46,7 @@ def main():
 	maxEnergy = 0
 
 	#calculates maximum values of each audio feature in our dataset
-	for song in rows:
+	for song in new_rows:
 		if song[1] > maxValence:
 			maxValence = song[1]
 		if song[2] > maxTempo:
@@ -57,32 +57,32 @@ def main():
 			maxEnergy = song[4]
 			
 	#creates arrays of the combinations of audio feature pairs for each song
-	for song in rows:
+	for song in new_rows:
 		cleaned_row = []
 		cleaned_row.append(song[1]/maxValence)
 		cleaned_row.append(song[2]/maxTempo) 
 		data1.append(cleaned_row)
-	for song in rows:
+	for song in new_rows:
 		cleaned_row = []
 		cleaned_row.append(song[1]/maxValence)
 		cleaned_row.append(song[3]/maxDance) 
 		data2.append(cleaned_row)
-	for song in rows:
+	for song in new_rows:
 		cleaned_row = []
 		cleaned_row.append(song[1]/maxValence)
 		cleaned_row.append(song[4]/maxEnergy)
 		data3.append(cleaned_row)
-	for song in rows:
+	for song in new_rows:
 		cleaned_row = []
 		cleaned_row.append(song[2]/maxTempo)
 		cleaned_row.append(song[3]/maxDance)
 		data4.append(cleaned_row)
-	for song in rows:
+	for song in new_rows:
 		cleaned_row = []
 		cleaned_row.append(song[2]/maxTempo)
 		cleaned_row.append(song[4]/maxEnergy)
 		data5.append(cleaned_row)
-	for song in rows:
+	for song in new_rows:
 		cleaned_row = []
 		cleaned_row.append(song[3]/maxDance)
 		cleaned_row.append(song[4]/maxEnergy)
